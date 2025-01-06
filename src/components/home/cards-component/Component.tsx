@@ -28,7 +28,7 @@ export default function HomeCardsComponent() {
           </Card>
         </Link>
 
-        <Link href="/scan/python" className="group h-full">
+        <Link href="/scan/pypi" className="group h-full">
           <Card className="h-full border-zinc-200 transition-all duration-300 hover:bg-accent dark:border-zinc-800">
             <CardHeader className="space-y-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent transition-transform duration-300 group-hover:scale-110">

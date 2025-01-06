@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function Footer() {
   return (
     <>
@@ -11,6 +13,17 @@ export default function Footer() {
             <p className="text-sm text-muted-foreground">
               Crafted with precision for the developer community
             </p>
+            <div className="flex flex-col items-center space-y-2">
+              <p className="text-sm text-muted-foreground">
+                Have interesting projects 🚀 or up for feedback 🔈?
+              </p>
+              <Link
+                href="https://t.ly/lvx9X"
+                className="text-sm underline underline-offset-4 transition-colors hover:text-primary"
+              >
+                Let&apos;s chat →
+              </Link>
+            </div>
           </div>
         </div>
       </footer>

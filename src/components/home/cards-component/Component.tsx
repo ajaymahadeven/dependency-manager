@@ -1,5 +1,6 @@
+import { DiNpm } from 'react-icons/di';
+import { SiComposer, SiPython } from 'react-icons/si';
 import Link from 'next/link';
-import { FileCode, FileJson, Package } from 'lucide-react';
 import {
   Card,
   CardDescription,
@@ -17,7 +18,7 @@ export default function HomeCardsComponent() {
           <Card className="h-full border-zinc-200 transition-all duration-300 hover:bg-accent dark:border-zinc-800">
             <CardHeader className="space-y-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent transition-transform duration-300 group-hover:scale-110">
-                <FileJson className="h-6 w-6" />
+                <DiNpm className="h-6 w-6 text-red-600 lg:h-9 lg:w-9" />
               </div>
               <CardTitle className="text-xl">NPM Packages</CardTitle>
               <CardDescription>
@@ -31,7 +32,7 @@ export default function HomeCardsComponent() {
           <Card className="h-full border-zinc-200 transition-all duration-300 hover:bg-accent dark:border-zinc-800">
             <CardHeader className="space-y-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent transition-transform duration-300 group-hover:scale-110">
-                <Package className="h-6 w-6" />
+                <SiPython className="h-6 w-6 rounded text-yellow-400 lg:h-9 lg:w-9" />
               </div>
               <CardTitle className="text-xl">Python Packages</CardTitle>
               <CardDescription>
@@ -45,7 +46,7 @@ export default function HomeCardsComponent() {
           <Card className="h-full border-zinc-200 transition-all duration-300 hover:bg-accent dark:border-zinc-800">
             <CardHeader className="space-y-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent transition-transform duration-300 group-hover:scale-110">
-                <FileCode className="h-6 w-6" />
+                <SiComposer className="h-6 w-6 text-amber-950 lg:h-9 lg:w-9" />
               </div>
               <CardTitle className="text-xl">Composer</CardTitle>
               <CardDescription>

@@ -1,5 +1,5 @@
+import { SiGithub } from 'react-icons/si';
 import Link from 'next/link';
-import { Github } from 'lucide-react';
 // import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from '@/components/ui/button';
 
@@ -18,11 +18,8 @@ export default function SiteNavbar() {
           <div className="flex items-center gap-4">
             {/* <ThemeToggle /> */}
             <Button type="button" variant="ghost" size="icon" asChild>
-              <Link
-                href="https://github.com/yourusername/dependency-tracker"
-                target="_blank"
-              >
-                <Github className="h-5 w-5" />
+              <Link href="https://t.ly/1-rek" target="_blank">
+                <SiGithub className="h-5 w-5" />
                 <span className="sr-only">GitHub</span>
               </Link>
             </Button>

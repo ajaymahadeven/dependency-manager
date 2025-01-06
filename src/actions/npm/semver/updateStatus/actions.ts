@@ -4,8 +4,8 @@ export const updateStatus = (latest: string, current: string): string => {
   console.log(`Checking update status for ${current} and ${latest}`);
 
   // Handle "Failed" cases
-  if (latest === 'Failed') {
-    return 'Failed';
+  if (latest === 'failed') {
+    return 'failed';
   }
 
   // Normalize the versions by coercing shorthand versions like "^9" to "9.0.0"
@@ -25,7 +25,7 @@ export const updateStatus = (latest: string, current: string): string => {
     }
   } catch (e) {
     console.error(e);
-    return 'Failed';
+    return 'failed';
   }
 
   return 'outdated';

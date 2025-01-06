@@ -33,6 +33,10 @@ interface PackageVersion {
   status: string;
 }
 
+interface Dependencies {
+  [name: string]: string;
+}
+
 export default function PackageAnalyzer() {
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -86,8 +90,8 @@ export default function PackageAnalyzer() {
 
       const analyzed = await Promise.all(
         Object.entries({
-          ...json.dependencies,
-          ...json.devDependencies,
+          ...(json.dependencies as Dependencies),
+          ...(json.devDependencies as Dependencies),
         }).map(async ([name, version]) => {
           const current = (version as string).replace('^', '');
           console.log(`Analyzing ${name} with version ${current}`);
@@ -129,11 +133,6 @@ export default function PackageAnalyzer() {
     const originalPackage = JSON.parse(
       localStorage.getItem('uploadedPackage') || '{}',
     );
-
-    const updatedDependencies = Object.fromEntries(
-      packageData.map((pkg) => [pkg.name, `^${pkg.latest}`]),
-    );
-
     const updatedPackage = {
       ...originalPackage,
       dependencies: {
@@ -289,10 +288,14 @@ export default function PackageAnalyzer() {
                                 ? 'bg-green-100 text-green-700'
                                 : pkg.status === 'outdated'
                                   ? 'bg-yellow-100 text-yellow-700'
-                                  : 'bg-red-100 text-red-700'
+                                  : pkg.status === 'Failed'
+                                    ? 'bg-red-100 text-red-700'
+                                    : pkg.status === 'major-update'
+                                      ? 'bg-blue-100 text-blue-700'
+                                      : 'bg-gray-100 text-gray-700'
                             }`}
                           >
-                            {pkg.status.replace('-', ' ')}
+                            {pkg.status}
                           </span>
                         </TableCell>
                       </TableRow>

@@ -17,6 +17,6 @@ export const npmRegistryLookUp = async (
     return latestVersion as string;
   } catch (e) {
     console.error(e);
-    return 'Failed';
+    return 'failed';
   }
 };

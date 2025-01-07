@@ -3,13 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { fetchPackageDetails } from '@/actions/pypi/retrievePackageDetails/actions';
-import {
-  AlertTriangle,
-  Download,
-  RefreshCw,
-  Shield,
-  Upload,
-} from 'lucide-react';
+import { Download, RefreshCw, Upload } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {

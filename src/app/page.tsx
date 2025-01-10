@@ -1,6 +1,7 @@
 import HomeCardsComponent from '@/components/home/cards-component/Component';
 import Footer from '@/components/home/footer/Component';
 import HeroSection from '@/components/home/hero-section/Component';
+import SearchPackageComponent from '@/components/home/search-component/Component';
 import SiteNavbar from '@/components/navbar/Component';
 
 export default function Page() {
@@ -10,7 +11,7 @@ export default function Page() {
 
       <div className="container mx-auto px-4 pb-16 pt-24">
         <HeroSection />
-
+        <SearchPackageComponent />
         <HomeCardsComponent />
       </div>
 

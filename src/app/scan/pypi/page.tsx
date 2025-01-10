@@ -180,9 +180,7 @@ dependencies = [
       <Card className="border-2">
         <CardHeader className="space-y-1">
           <CardTitle>Upload Python Dependencies</CardTitle>
-          <CardDescription>
-            Drop your requirements.txt, setup.py, or pyproject.toml file here
-          </CardDescription>
+          <CardDescription>Drop your requirements.txt here</CardDescription>
         </CardHeader>
         <CardContent>
           <div
@@ -258,7 +256,6 @@ dependencies = [
                     <TableHead>Latest</TableHead>
                     <TableHead>Recommended</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Security</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

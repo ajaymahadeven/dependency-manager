@@ -50,7 +50,7 @@ export default function HomeCardsComponent() {
               </div>
               <CardTitle className="text-xl">Composer</CardTitle>
               <CardDescription>
-                Manage your PHP dependencies with ease (Coming Soon)
+                Manage your PHP dependencies with ease !
               </CardDescription>
             </CardHeader>
           </Card>

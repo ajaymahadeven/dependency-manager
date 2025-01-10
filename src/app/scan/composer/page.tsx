@@ -107,7 +107,7 @@ export default function PackageAnalyzer() {
             .trim();
 
           console.log(`Analyzing ${name} with version ${current}`);
-          const latest = await packagistRegistryLookup(name, current);
+          const latest = await packagistRegistryLookup(name);
           const recommended = await findRecommendedPackageVersion(
             name,
             current,

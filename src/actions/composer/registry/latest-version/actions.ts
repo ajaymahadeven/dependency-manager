@@ -9,7 +9,6 @@ interface VersionPackages {
 
 export async function packagistRegistryLookup(
   packageName: string,
-  current: string,
 ): Promise<string | null> {
   try {
     const response = await fetch(

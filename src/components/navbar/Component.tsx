@@ -1,9 +1,9 @@
 'use client';
 
 import { SiGithub } from 'react-icons/si';
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { PackageOpen } from 'lucide-react';
 // import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
 
@@ -15,14 +15,8 @@ export default function SiteNavbar() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/" className="flex items-center gap-2">
-            <Image
-              src="/logo.png"
-              alt="Dependency Manager Logo"
-              width={32}
-              height={32}
-              className="rounded-lg"
-            />
+          <Link href="/" className="mx-2 flex items-center gap-2">
+            <PackageOpen className="h-6 w-6" />
             <span className="hidden text-xl font-semibold sm:inline-block">
               Dependency Manager
             </span>

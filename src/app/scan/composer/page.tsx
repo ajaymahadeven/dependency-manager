@@ -4,8 +4,6 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { packagistRegistryLookup } from '@/actions/composer/registry/latest-version/actions';
 import { findRecommendedPackageVersion } from '@/actions/composer/registry/recommended-version/actions';
-import { npmRegistryLookUp } from '@/actions/npm/registry/actions';
-import { getRecommendedVersion } from '@/actions/npm/semver/getRecommendedVersion/actions';
 import { updateStatus } from '@/actions/npm/semver/updateStatus/actions';
 import { AlertCircle, Download, RefreshCw, Upload } from 'lucide-react';
 import SiteNavbar from '@/components/navbar/Component';

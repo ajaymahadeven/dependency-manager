@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { DiNpm } from 'react-icons/di';
 import { SiComposer, SiPython } from 'react-icons/si';
 import Link from 'next/link';
-import { Download, ExternalLink, Search, Star } from 'lucide-react';
+import { Download, Search, Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';

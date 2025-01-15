@@ -1,4 +1,4 @@
-import type { PackageVersion } from '@/app/scan/pypi/page';
+import type { PackageVersion } from '@/types/interfaces/scan/pypi/types';
 import axios from 'axios';
 
 export const fetchPackageDetails = async (

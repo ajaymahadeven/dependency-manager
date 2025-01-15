@@ -1,36 +1,35 @@
 #!/bin/bash
 
-echo '🔄 Running pre-commit checks: styling, linting, type-checking, and more.'
+echo '🛫 Pre-flight checks initiated: styling, linting, type-checking, and more.'
 
 # Check Prettier standards
 npm run check-format ||
 (
-    echo "⚠️ Prettier Check Failed. Please run $(npm run format), review the changes, and try committing again.";
+    echo "⚠️ Prettier Check Failed. Run $(npm run format), review the changes, and attempt takeoff again.";
     false;
 )
 
-# Check ESLint Standards
+# Check ESLint standards
 npm run lint ||
 (
-    echo '⚠️ ESLint Check Failed. Please address the issues listed above, add the changes, and try committing again.';
+    echo '⚠️ ESLint Check Failed. Correct the issues listed above, secure the fixes, and prepare for re-departure.';
     false;
 )
 
 # Check tsconfig standards
 npm run check-types ||
 (
-    echo '⚠️ Type Check Failed. Please review the errors above, make the necessary changes, and try again.';
+    echo '⚠️ Type Check Failed. Review the errors above, make adjustments, and request clearance to proceed.';
     false;
 )
 
-# If everything passes... Now we can commit - commented this code to be optional too much time
-# echo '🚀 Code looks good. Proceeding with the build...'
-
+# Optional build step (commented for now)
+# echo '🚀 Preparing for final takeoff with a build...'
 # npm run build ||
 # (
-#     echo '❌ Build Failed. Please review the build errors above and make necessary corrections.';
+#     echo '❌ Build Check Failed. Address the build issues before boarding.';
 #     false;
 # )
 
-# If everything passes... Now we can commit
-echo '✅ All checks passed. Proceeding with the commit.'
+# If all checks pass
+echo '✅ All systems operational. Cleared for takeoff. Proceed with the commit!'

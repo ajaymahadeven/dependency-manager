@@ -10,13 +10,14 @@ export default function PageHeaderComponent({
     <>
       <div className="space-y-2">
         <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-          Requirements.txt Version Analyzer
+          Package.json Version Analyzer
         </h1>
         <p className="text-lg text-muted-foreground">
-          Analyze your requirements.txt dependencies and get recommendations for
+          Analyze your package.json dependencies and get recommendations for
           version updates.
         </p>
       </div>
+
       {error && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />

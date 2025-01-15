@@ -1,41 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { npmRegistryLookUp } from '@/actions/npm/registry/actions';
 import { getRecommendedVersion } from '@/actions/npm/semver/getRecommendedVersion/actions';
 import { updateStatus } from '@/actions/npm/semver/updateStatus/actions';
-import { AlertCircle, Download, RefreshCw, Upload } from 'lucide-react';
+import type {
+  Dependencies,
+  PackageVersion,
+} from '@/types/interfaces/scan/npm/types';
 import SiteNavbar from '@/components/navbar/Component';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-
-interface PackageVersion {
-  name: string;
-  current: string;
-  latest: string;
-  recommended: string;
-  status: string;
-}
-
-interface Dependencies {
-  [name: string]: string;
-}
+import IsAnalyzingComponent from '@/components/scan/npm/is-analyzing/Component';
+import PageHeaderComponent from '@/components/scan/npm/page-header/Component';
+import TableResultsComponent from '@/components/scan/npm/table-results/Component';
+import UploadAreaComponent from '@/components/scan/npm/upload-area/Component';
 
 export default function PackageAnalyzer() {
   const [isDragging, setIsDragging] = useState(false);
@@ -171,140 +148,22 @@ export default function PackageAnalyzer() {
       <SiteNavbar />
       <div className="container mx-auto px-4 py-8">
         <div className="space-y-6">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-              Package.json Version Analyzer
-            </h1>
-            <p className="text-lg text-muted-foreground">
-              Analyze your package.json dependencies and get recommendations for
-              version updates.
-            </p>
-          </div>
+          <PageHeaderComponent error={error} />
 
-          {error && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+          <UploadAreaComponent
+            isDragging={isDragging}
+            handleDragOver={handleDragOver}
+            handleDragLeave={handleDragLeave}
+            handleDrop={handleDrop}
+            handleFileInput={handleFileInput}
+          />
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Upload package.json</CardTitle>
-              <CardDescription>
-                Drag and drop your package.json file or click to browse
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div
-                className={`rounded-lg border-2 border-dashed p-8 text-center ${
-                  isDragging
-                    ? 'border-primary bg-primary/10'
-                    : 'border-muted-foreground/25'
-                }`}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-              >
-                <div className="flex flex-col items-center gap-2">
-                  <Upload className="h-8 w-8 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">
-                    Drop your package.json here or
-                    <label className="mx-1 cursor-pointer text-primary hover:underline">
-                      browse
-                      <input
-                        type="file"
-                        className="hidden"
-                        accept="application/json"
-                        onChange={handleFileInput}
-                      />
-                    </label>
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Only package.json files are supported
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {isAnalyzing && (
-            <Card>
-              <CardContent className="p-8">
-                <div className="flex items-center justify-center gap-2">
-                  <RefreshCw className="h-4 w-4 animate-spin" />
-                  <p>Analyzing package.json and checking for updates...</p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {packageData && !isAnalyzing && (
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>Analysis Results</CardTitle>
-                  <CardDescription>
-                    Review the recommended updates for your dependencies
-                  </CardDescription>
-                </div>
-                <Button type="button" onClick={downloadUpdatedPackage}>
-                  <Download className="mr-2 h-4 w-4" />
-                  Download Package.json (Latest)
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Package</TableHead>
-                      <TableHead>Current Version</TableHead>
-                      <TableHead>Latest Version</TableHead>
-                      <TableHead>Recommended Version</TableHead>
-                      <TableHead>Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {packageData.map((pkg) => (
-                      <TableRow key={pkg.name}>
-                        <TableCell className="font-medium">
-                          <Link
-                            href={`https://www.npmjs.com/package/${pkg.name}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-primary hover:underline"
-                          >
-                            {pkg.name}
-                          </Link>
-                        </TableCell>
-                        <TableCell>{pkg.current}</TableCell>
-                        <TableCell>{pkg.latest}</TableCell>
-                        <TableCell>{pkg.recommended}</TableCell>
-                        <TableCell>
-                          <span
-                            className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                              pkg.status === 'up-to-date'
-                                ? 'bg-green-100 text-green-700'
-                                : pkg.status === 'outdated'
-                                  ? 'bg-yellow-100 text-yellow-700'
-                                  : pkg.status === 'Failed'
-                                    ? 'bg-red-100 text-red-700'
-                                    : pkg.status === 'major-update'
-                                      ? 'bg-blue-100 text-blue-700'
-                                      : 'bg-gray-100 text-gray-700'
-                            }`}
-                          >
-                            {pkg.status}
-                          </span>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          )}
+          <IsAnalyzingComponent isAnalyzing={isAnalyzing} />
+          <TableResultsComponent
+            packageData={packageData}
+            isAnalyzing={isAnalyzing}
+            downloadUpdatedPackage={downloadUpdatedPackage}
+          />
         </div>
       </div>
     </div>

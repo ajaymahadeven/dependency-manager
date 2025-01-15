@@ -4,10 +4,10 @@ import { useState } from 'react';
 import { fetchPackageDetails } from '@/actions/pypi/retrievePackageDetails/actions';
 import type { PackageVersion } from '@/types/interfaces/scan/pypi/types';
 import SiteNavbar from '@/components/navbar/Component';
-import DropUploadAreaComponent from '@/components/scan/pypi/drop-area/Component';
 import IsAnalyzingComponent from '@/components/scan/pypi/is-analyzing/Component';
 import PageHeaderComponent from '@/components/scan/pypi/page-header/Component';
 import TableResultsComponent from '@/components/scan/pypi/table-results/Component';
+import UploadAreaComponent from '@/components/scan/pypi/upload-area/Component';
 
 export default function Page() {
   const [isDragging, setIsDragging] = useState(false);
@@ -151,7 +151,7 @@ dependencies = [
       <SiteNavbar />
       <div className="container mx-auto px-4 py-8">
         <PageHeaderComponent error={error} />
-        <DropUploadAreaComponent
+        <UploadAreaComponent
           isDragging={isDragging}
           handleDragOver={handleDragOver}
           handleDragLeave={handleDragLeave}

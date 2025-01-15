@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 
-export default function DropUploadAreaComponent({
+export default function UploadAreaComponent({
   isDragging,
   handleDragOver,
   handleDragLeave,

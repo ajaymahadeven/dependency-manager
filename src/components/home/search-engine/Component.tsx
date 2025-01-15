@@ -6,9 +6,12 @@ import { SiComposer, SiPython } from 'react-icons/si';
 import Link from 'next/link';
 import { searchComposerRegistry } from '@/actions/search-engine/composer/action';
 import { searchnpmRegistry } from '@/actions/search-engine/npm/actions';
+import { searchPyPiRegistry } from '@/actions/search-engine/pypi/actions';
 import type {
   SearchEngineResultsForNpm,
+  SearchEngineResultsForPyPi,
   SearchRegistryType,
+  searchSuggestions,
 } from '@/types/interfaces/search-engine/types';
 import { Download, Search, Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -29,7 +32,8 @@ export default function SearchEngineComponent() {
   const [searchResults, setSearchResults] =
     useState<SearchEngineResultsForNpm>();
 
-  const [searchSuggestions, setSearchSuggestions] = useState<string[]>();
+  const [searchSuggestions, setSearchSuggestions] =
+    useState<searchSuggestions[]>();
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
@@ -78,29 +82,72 @@ export default function SearchEngineComponent() {
     try {
       let npmData: SearchEngineResultsForNpm[] = [];
       let composerData: SearchEngineResultsForNpm[] = [];
-      if (
-        selectedRegistry === 'npm' ||
-        (selectedRegistry === 'all' && value.length > 1)
-      ) {
+      let pyPiData: SearchEngineResultsForPyPi[] = [];
+      if (selectedRegistry === 'npm' && value.length > 1) {
+        console.log('NPM Data');
         npmData = (await searchnpmRegistry(value, { signal })) || [];
-      } else if (
-        selectedRegistry === 'composer' ||
-        (selectedRegistry === 'all' && value.length > 1)
-      ) {
+      } else if (selectedRegistry === 'composer' && value.length > 1) {
+        console.log('Composer Data');
         composerData = await searchComposerRegistry(value, { signal });
+      } else if (selectedRegistry === 'pypi' && value.length > 1) {
+        console.log('PyPi Data');
+        pyPiData = (await searchPyPiRegistry(value, { signal })) || [];
+        console.log('PyPi Data', pyPiData);
       }
 
       if (selectedRegistry === 'all') {
-        const combinedData = [...npmData, ...composerData];
+        npmData = (await searchnpmRegistry(value, { signal })) || [];
+        composerData = (await searchComposerRegistry(value, { signal })) || [];
+        pyPiData = (await searchPyPiRegistry(value, { signal })) || [];
+
+        const combinedData = [...composerData, ...npmData, ...pyPiData];
+
+        // Shuffle the combinedData array - using Fisher-Yates shuffle
+        for (let i = combinedData.length - 1; i > 0; i--) {
+          const randomIndex = Math.floor(Math.random() * (i + 1));
+          [combinedData[i], combinedData[randomIndex]] = [
+            combinedData[randomIndex],
+            combinedData[i],
+          ];
+        }
+
         const searchSuggestions = combinedData
-          .map((result) => result.name)
-          .slice(0, 15);
+          .map((result) => {
+            return {
+              id: result.id,
+              name: result.name,
+              type: result.type as SearchRegistryType,
+            };
+          })
+          .slice(0, 10);
+
         setSearchSuggestions(searchSuggestions);
       } else if (selectedRegistry === 'npm') {
-        const searchSuggestions = npmData.map((result) => result.name);
+        const searchSuggestions = npmData.map((result) => {
+          return {
+            id: result.name,
+            name: result.name,
+            type: result.type as SearchRegistryType,
+          };
+        });
         setSearchSuggestions(searchSuggestions);
       } else if (selectedRegistry === 'composer') {
-        const searchSuggestions = composerData.map((result) => result.name);
+        const searchSuggestions = composerData.map((result) => {
+          return {
+            id: result.name,
+            name: result.name,
+            type: result.type as SearchRegistryType,
+          };
+        });
+        setSearchSuggestions(searchSuggestions);
+      } else if (selectedRegistry === 'pypi') {
+        const searchSuggestions = pyPiData.map((result) => {
+          return {
+            id: result.name,
+            name: result.name,
+            type: result.type as SearchRegistryType,
+          };
+        });
         setSearchSuggestions(searchSuggestions);
       }
     } catch (error) {
@@ -149,19 +196,31 @@ export default function SearchEngineComponent() {
               {searchSuggestions?.length === 0 && (
                 <div className="px-4 py-2 text-gray-400">No results found</div>
               )}
-              {searchSuggestions?.map((suggestion) => (
+              {searchSuggestions?.map((suggestion, index) => (
                 <div
-                  key={suggestion}
-                  className="space-y-2"
+                  key={index}
+                  className="space-y-2 text-wrap"
                   onClick={() => {
-                    setSearchQuery(suggestion);
+                    setSearchQuery(suggestion.name);
                     setShowSuggestions(false);
                   }}
                 >
                   <div className="px-4 py-2 hover:bg-gray-50">
                     <div className="flex items-center gap-2">
                       <Search className="h-4 w-4 text-gray-400" />
-                      <span>{suggestion}</span>
+                      <span>{suggestion.name}</span>
+                      {/* Add Icon Here based on type */}
+                      <div className="flex items-center gap-2">
+                        {suggestion.type === 'npm' && (
+                          <DiNpm className="h-4 w-4 text-red-600" />
+                        )}
+                        {suggestion.type === 'pypi' && (
+                          <SiPython className="h-4 w-4 text-yellow-400" />
+                        )}
+                        {suggestion.type === 'composer' && (
+                          <SiComposer className="h-4 w-4 text-amber-950" />
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -6,6 +6,9 @@ export const searchComposerRegistry = async (
   p0: { signal: AbortSignal },
 ) => {
   try {
+    if (searchTerm === '') {
+      return [];
+    }
     const response = await axios.get(
       `https://packagist.org/search.json?q=${searchTerm}`,
       { signal: p0.signal },

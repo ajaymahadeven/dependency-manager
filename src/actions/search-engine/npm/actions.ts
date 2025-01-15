@@ -8,6 +8,9 @@ export const searchnpmRegistry = async (
   searchTerm: string,
   p0: { signal: AbortSignal },
 ) => {
+  if (searchTerm === '') {
+    return [];
+  }
   try {
     const response = await axios.get(
       `https://registry.npmjs.org/-/v1/search?text=${searchTerm}&size=10`,

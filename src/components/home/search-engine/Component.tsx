@@ -4,6 +4,12 @@ import { useEffect, useRef, useState } from 'react';
 import { DiNpm } from 'react-icons/di';
 import { SiComposer, SiPython } from 'react-icons/si';
 import Link from 'next/link';
+import { searchComposerRegistry } from '@/actions/search-engine/composer/action';
+import { searchnpmRegistry } from '@/actions/search-engine/npm/actions';
+import type {
+  SearchEngineResultsForNpm,
+  SearchRegistryType,
+} from '@/types/interfaces/search-engine/types';
 import { Download, Search, Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,12 +23,18 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-export default function GoogleStyleSearchComponent() {
+export default function SearchEngineComponent() {
+  let abortController: AbortController | null = null;
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] =
+    useState<SearchEngineResultsForNpm>();
+
+  const [searchSuggestions, setSearchSuggestions] = useState<string[]>();
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
-  const [selectedRegistry, setSelectedRegistry] = useState('all');
+  const [selectedRegistry, setSelectedRegistry] =
+    useState<SearchRegistryType>('all');
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -36,40 +48,74 @@ export default function GoogleStyleSearchComponent() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const searchResults = [
-    {
-      name: 'react',
-      description: 'A JavaScript library for building user interfaces',
-      version: '18.2.0',
-      downloads: '15M/week',
-      stars: '203k',
-      type: 'npm',
-      url: 'https://www.npmjs.com/package/react',
-    },
-    {
-      name: 'requests',
-      description: 'Python HTTP for Humans',
-      version: '2.31.0',
-      downloads: '28M/month',
-      stars: '49.8k',
-      type: 'pypi',
-      url: 'https://pypi.org/project/requests/',
-    },
-    {
-      name: 'laravel/framework',
-      description: 'The Laravel Framework',
-      version: '10.28.0',
-      downloads: '5M/month',
-      stars: '30k',
-      type: 'composer',
-      url: 'https://packagist.org/packages/laravel/framework',
-    },
-  ];
-
   const handleSearch = () => {
     setShowSuggestions(false);
     setHasSearched(true);
   };
+
+  const handleOnValueChange = async (value: string) => {
+    // Reset state if the input is empty
+    if (value.length === 0) {
+      setShowSuggestions(false);
+      setSearchQuery('');
+      setSearchSuggestions([]);
+      return;
+    }
+
+    // Update the query and show suggestions
+    setSearchQuery(value);
+    setShowSuggestions(true);
+
+    // Cancel any ongoing API request
+    if (abortController) {
+      abortController.abort();
+    }
+
+    // Create a new AbortController for the current request
+    abortController = new AbortController();
+    const signal = abortController.signal;
+
+    try {
+      let npmData: SearchEngineResultsForNpm[] = [];
+      let composerData: SearchEngineResultsForNpm[] = [];
+      if (
+        selectedRegistry === 'npm' ||
+        (selectedRegistry === 'all' && value.length > 1)
+      ) {
+        npmData = (await searchnpmRegistry(value, { signal })) || [];
+      } else if (
+        selectedRegistry === 'composer' ||
+        (selectedRegistry === 'all' && value.length > 1)
+      ) {
+        composerData = await searchComposerRegistry(value, { signal });
+      }
+
+      if (selectedRegistry === 'all') {
+        const combinedData = [...npmData, ...composerData];
+        const searchSuggestions = combinedData
+          .map((result) => result.name)
+          .slice(0, 15);
+        setSearchSuggestions(searchSuggestions);
+      } else if (selectedRegistry === 'npm') {
+        const searchSuggestions = npmData.map((result) => result.name);
+        setSearchSuggestions(searchSuggestions);
+      } else if (selectedRegistry === 'composer') {
+        const searchSuggestions = composerData.map((result) => result.name);
+        setSearchSuggestions(searchSuggestions);
+      }
+    } catch (error) {
+      if ((error as Error).name === 'AbortError') {
+        console.log('Request canceled');
+      } else {
+        console.error('Error fetching data:', error);
+      }
+    } finally {
+      abortController = null; // Reset controller after the request
+    }
+  };
+
+  console.log('Search Suggestions', searchSuggestions);
+  console.log('Search Registry', selectedRegistry);
 
   return (
     <div className="bg-white px-4">
@@ -84,10 +130,7 @@ export default function GoogleStyleSearchComponent() {
               placeholder="Search packages..."
               className="h-12 rounded-full border border-gray-200 px-6 pr-12 shadow-sm hover:shadow-md focus:shadow-md"
               value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setShowSuggestions(true);
-              }}
+              onChange={(e) => handleOnValueChange(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   handleSearch();
@@ -103,20 +146,26 @@ export default function GoogleStyleSearchComponent() {
           {/* Search Suggestions */}
           {showSuggestions && searchQuery && (
             <Card className="absolute z-50 mt-2 w-full rounded-2xl py-2 shadow-lg">
-              <div className="space-y-2">
-                <div className="px-4 py-2 hover:bg-gray-50">
-                  <div className="flex items-center gap-2">
-                    <Search className="h-4 w-4 text-gray-400" />
-                    <span>react components library</span>
+              {searchSuggestions?.length === 0 && (
+                <div className="px-4 py-2 text-gray-400">No results found</div>
+              )}
+              {searchSuggestions?.map((suggestion) => (
+                <div
+                  key={suggestion}
+                  className="space-y-2"
+                  onClick={() => {
+                    setSearchQuery(suggestion);
+                    setShowSuggestions(false);
+                  }}
+                >
+                  <div className="px-4 py-2 hover:bg-gray-50">
+                    <div className="flex items-center gap-2">
+                      <Search className="h-4 w-4 text-gray-400" />
+                      <span>{suggestion}</span>
+                    </div>
                   </div>
                 </div>
-                <div className="px-4 py-2 hover:bg-gray-50">
-                  <div className="flex items-center gap-2">
-                    <Search className="h-4 w-4 text-gray-400" />
-                    <span>react native packages</span>
-                  </div>
-                </div>
-              </div>
+              ))}
             </Card>
           )}
         </div>
@@ -134,7 +183,9 @@ export default function GoogleStyleSearchComponent() {
             {/* Registry Select */}
             <Select
               value={selectedRegistry}
-              onValueChange={setSelectedRegistry}
+              onValueChange={(value: string) =>
+                setSelectedRegistry(value as SearchRegistryType)
+              }
             >
               <SelectTrigger className="h-12 w-[180px] rounded-full border border-gray-200">
                 <SelectValue defaultValue="all">
@@ -188,7 +239,7 @@ export default function GoogleStyleSearchComponent() {
         )}
 
         {/* Search Results */}
-        {hasSearched && (
+        {/* {hasSearched && (
           <div className="mt-8 space-y-6">
             <div className="text-sm text-gray-600">
               About 1,230,000 results (0.42 seconds)
@@ -232,7 +283,7 @@ export default function GoogleStyleSearchComponent() {
               </div>
             ))}
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

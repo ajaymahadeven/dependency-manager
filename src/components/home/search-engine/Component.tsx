@@ -197,33 +197,47 @@ export default function SearchEngineComponent() {
                 <div className="px-4 py-2 text-gray-400">No results found</div>
               )}
               {searchSuggestions?.map((suggestion, index) => (
-                <div
+                <Link
                   key={index}
-                  className="space-y-2 text-wrap"
-                  onClick={() => {
-                    setSearchQuery(suggestion.name);
-                    setShowSuggestions(false);
-                  }}
+                  href={
+                    suggestion.type === 'npm'
+                      ? `https://npmjs.com/package/${suggestion.name}`
+                      : suggestion.type === 'pypi'
+                        ? ` https://pypi.org/project/${suggestion.name}`
+                        : suggestion.type === 'composer'
+                          ? `https://packagist.org/packages/${suggestion.name}`
+                          : ''
+                  }
+                  target="_blank"
+                  rel="noreferrer"
                 >
-                  <div className="px-4 py-2 hover:bg-gray-50">
-                    <div className="flex items-center gap-2">
-                      <Search className="h-4 w-4 text-gray-400" />
-                      <span>{suggestion.name}</span>
-                      {/* Add Icon Here based on type */}
+                  <div
+                    className="space-y-2 text-wrap"
+                    onClick={() => {
+                      setSearchQuery(suggestion.name);
+                      setShowSuggestions(false);
+                    }}
+                  >
+                    <div className="px-4 py-2 hover:bg-gray-50">
                       <div className="flex items-center gap-2">
-                        {suggestion.type === 'npm' && (
-                          <DiNpm className="h-4 w-4 text-red-600" />
-                        )}
-                        {suggestion.type === 'pypi' && (
-                          <SiPython className="h-4 w-4 text-yellow-400" />
-                        )}
-                        {suggestion.type === 'composer' && (
-                          <SiComposer className="h-4 w-4 text-amber-950" />
-                        )}
+                        <Search className="h-4 w-4 text-gray-400" />
+                        <span>{suggestion.name}</span>
+                        {/* Add Icon Here based on type */}
+                        <div className="flex items-center gap-2">
+                          {suggestion.type === 'npm' && (
+                            <DiNpm className="h-4 w-4 text-red-600" />
+                          )}
+                          {suggestion.type === 'pypi' && (
+                            <SiPython className="h-4 w-4 text-yellow-400" />
+                          )}
+                          {suggestion.type === 'composer' && (
+                            <SiComposer className="h-4 w-4 text-amber-950" />
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </Card>
           )}

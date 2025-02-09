@@ -80,8 +80,10 @@ export default function PackageAnalyzer() {
           }
 
           const recommended = latest
-            ? getRecommendedVersion(current, latest)
+            ? await getRecommendedVersion(current, latest, name)
             : current;
+
+          console.log('Recommended', recommended);
 
           return {
             name,

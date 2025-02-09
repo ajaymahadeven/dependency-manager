@@ -1,10 +1,12 @@
 'use client';
 
+// import { ThemeToggle } from '@/components/theme-toggle';
+import { BsInfoCircleFill } from 'react-icons/bs';
+import { LuShieldAlert } from 'react-icons/lu';
 import { SiGithub } from 'react-icons/si';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { PackageOpen } from 'lucide-react';
-// import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
 
 export default function SiteNavbar() {
@@ -30,6 +32,28 @@ export default function SiteNavbar() {
           )}
           {/* <ThemeToggle /> */}
           <Button type="button" variant="outline" size="icon" asChild>
+            <Link
+              href="/docs/why-updates-matter"
+              target="_blank"
+              rel="noopener noreferrer"
+              prefetch={true}
+            >
+              <LuShieldAlert className="h-5 w-5" />
+              <span className="sr-only">Why Updates matters?</span>
+            </Link>
+          </Button>
+          <Button type="button" variant="outline" size="icon" asChild>
+            <Link
+              href="/docs/package-status"
+              target="_blank"
+              rel="noopener noreferrer"
+              prefetch={true}
+            >
+              <BsInfoCircleFill className="h-5 w-5" />
+              <span className="sr-only">Info</span>
+            </Link>
+          </Button>
+          <Button type="button" variant={'outline'} size="icon" asChild>
             <Link
               href="https://t.ly/1-rek"
               target="_blank"

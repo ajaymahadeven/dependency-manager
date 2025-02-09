@@ -175,7 +175,7 @@ export default function SearchEngineComponent() {
             <Input
               type="search"
               placeholder="Search packages..."
-              className="h-12 rounded-full border border-gray-200 px-6 pr-12 shadow-sm hover:shadow-md focus:shadow-md"
+              className="h-12 rounded-full border border-gray-200 px-6 pr-12 shadow-xs hover:shadow-md focus:shadow-md"
               value={searchQuery}
               onChange={(e) => handleOnValueChange(e.target.value)}
               onKeyDown={(e) => {
@@ -185,7 +185,7 @@ export default function SearchEngineComponent() {
               }}
             />
             <Search
-              className="absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 transform text-gray-400"
+              className="absolute top-1/2 right-4 h-5 w-5 -translate-y-1/2 transform text-gray-400"
               onClick={handleSearch}
             />
           </div>
@@ -248,7 +248,7 @@ export default function SearchEngineComponent() {
             <Button
               type="button"
               variant="secondary"
-              className="h-12 w-[180px] rounded-full border border-gray-200 bg-white font-bold shadow-sm hover:shadow-md focus:shadow-md"
+              className="h-12 w-[180px] rounded-full border border-gray-200 bg-white font-bold shadow-xs hover:shadow-md focus:shadow-md"
               onClick={handleSearch}
             >
               Search

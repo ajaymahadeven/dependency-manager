@@ -15,15 +15,7 @@ export default function HeroSection() {
         <h1 className="text-5xl font-bold md:text-6xl">
           Dependencies, Simplified.
         </h1>
-        <div className={CaveatFont.className}>
-          <p className="mt-6 text-xl tracking-wide text-muted-foreground md:text-2xl">
-            {'package.json hell? requirements.txt chaos? 🤯'}
-            <br />
-            {'npm audit giving you nightmares? 😱'}
-            <br />
-            {"Chill out friend, we've got your dependencies covered! 🎯 "}
-          </p>
-        </div>
+        <div className={`${CaveatFont.className} mt-6 h-10`}></div>
       </div>
     </>
   );

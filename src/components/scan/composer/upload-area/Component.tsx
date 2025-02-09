@@ -41,10 +41,10 @@ export default function UploadAreaComponent({
             onDrop={handleDrop}
           >
             <div className="flex flex-col items-center gap-2">
-              <Upload className="h-8 w-8 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">
+              <Upload className="text-muted-foreground h-8 w-8" />
+              <p className="text-muted-foreground text-sm">
                 Drop your composer.json here or
-                <label className="mx-1 cursor-pointer text-primary hover:underline">
+                <label className="text-primary mx-1 cursor-pointer hover:underline">
                   browse
                   <input
                     type="file"
@@ -54,7 +54,7 @@ export default function UploadAreaComponent({
                   />
                 </label>
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 Only composer.json files are supported
               </p>
             </div>

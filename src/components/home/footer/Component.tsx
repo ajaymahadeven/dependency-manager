@@ -10,16 +10,16 @@ export default function Footer() {
             <p className="text-xl font-medium">
               From Developers to Developers, with ❤️
             </p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Crafted with precision for the developer community
             </p>
             <div className="flex flex-col items-center space-y-2">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Have interesting projects 🚀 or up for feedback 🔈?
               </p>
               <Link
                 href="https://t.ly/lvx9X"
-                className="text-sm underline underline-offset-4 transition-colors hover:text-primary"
+                className="hover:text-primary text-sm underline underline-offset-4 transition-colors"
               >
                 Let&apos;s chat →
               </Link>

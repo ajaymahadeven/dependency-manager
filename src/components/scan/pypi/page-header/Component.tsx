@@ -12,7 +12,7 @@ export default function PageHeaderComponent({
         <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
           Requirements.txt Version Analyzer
         </h1>
-        <p className="text-lg text-muted-foreground">
+        <p className="text-muted-foreground text-lg">
           Analyze your requirements.txt dependencies and get recommendations for
           version updates.
         </p>

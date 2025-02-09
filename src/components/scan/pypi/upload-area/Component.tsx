@@ -36,8 +36,8 @@ export default function UploadAreaComponent({
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
           >
-            <Upload className="mb-4 h-8 w-8 text-muted-foreground" />
-            <label className="cursor-pointer text-center text-sm transition-colors hover:text-primary">
+            <Upload className="text-muted-foreground mb-4 h-8 w-8" />
+            <label className="hover:text-primary cursor-pointer text-center text-sm transition-colors">
               <span className="text-primary">Choose a file</span>
               <span className="text-muted-foreground"> or drag it here</span>
               <input

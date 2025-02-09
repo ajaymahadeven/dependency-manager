@@ -12,8 +12,8 @@ export default function SiteNavbar() {
   const isHomePage = pathname === '/';
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
+    <header className="bg-background/95 supports-backdrop-filter:bg-background/60 sticky top-0 z-50 w-full border-b backdrop-blur-sm">
+      <div className="container flex h-16 min-w-full items-center justify-between px-4">
         <div className="flex items-center gap-4">
           <Link href="/" className="mx-2 flex items-center gap-2">
             <PackageOpen className="h-6 w-6" />

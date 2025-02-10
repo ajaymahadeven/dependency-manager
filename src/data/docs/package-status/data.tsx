@@ -1,10 +1,4 @@
-import {
-  AlertCircle,
-  ArrowUpCircle,
-  Clock,
-  PackageCheck,
-  PackageX,
-} from 'lucide-react';
+import { AlertCircle, Clock, PackageCheck, PackageX } from 'lucide-react';
 
 export const statuses = [
   {

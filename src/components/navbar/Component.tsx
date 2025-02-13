@@ -31,28 +31,24 @@ export default function SiteNavbar() {
             </Button>
           )}
           {/* <ThemeToggle /> */}
+
+          {/* Why Updates matter link */}
           <Button type="button" variant="outline" size="icon" asChild>
-            <Link
-              href="/docs/why-updates-matter"
-              target="_blank"
-              rel="noopener noreferrer"
-              prefetch={true}
-            >
+            <Link href="/docs/why-updates-matter" prefetch={true}>
               <LuShieldAlert className="h-5 w-5" />
               <span className="sr-only">Why Updates matters?</span>
             </Link>
           </Button>
+
+          {/* Info Link */}
           <Button type="button" variant="outline" size="icon" asChild>
-            <Link
-              href="/docs/package-status"
-              target="_blank"
-              rel="noopener noreferrer"
-              prefetch={true}
-            >
+            <Link href="/docs/package-status" prefetch={true}>
               <BsInfoCircleFill className="h-5 w-5" />
               <span className="sr-only">Info</span>
             </Link>
           </Button>
+
+          {/* GitHub Link */}
           <Button type="button" variant={'outline'} size="icon" asChild>
             <Link
               href="https://t.ly/1-rek"

@@ -33,7 +33,7 @@ export const statuses = [
     textColor: 'text-blue-700',
   },
   {
-    status: 'Failed',
+    status: 'failed',
     icon: <PackageX className="h-5 w-5" />,
     title: 'Failed',
     description:

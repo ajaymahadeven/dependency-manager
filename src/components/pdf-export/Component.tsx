@@ -108,7 +108,7 @@ const getStatusStyle = (status: string) => {
       return { backgroundColor: '#FF9500', color: '#FFFFFF' };
     case 'major-update':
       return { backgroundColor: '#007AFF', color: '#FFFFFF' };
-    case 'Failed':
+    case 'failed':
       return { backgroundColor: '#FF3B30', color: '#FFFFFF' };
     default:
       return { backgroundColor: '#8E8E93', color: '#FFFFFF' };

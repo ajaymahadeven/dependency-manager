@@ -115,7 +115,7 @@ export default function TableResultsComponent({
                             ? 'bg-green-100 text-green-700'
                             : pkg.status === 'outdated'
                               ? 'bg-yellow-100 text-yellow-700'
-                              : pkg.status === 'Failed'
+                              : pkg.status === 'failed'
                                 ? 'bg-red-100 text-red-700'
                                 : pkg.status === 'major-update'
                                   ? 'bg-blue-100 text-blue-700'

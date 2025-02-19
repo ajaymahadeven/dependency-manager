@@ -25,7 +25,7 @@ export const statuses = [
   {
     status: 'major-update',
     icon: <AlertCircle className="h-5 w-5" />,
-    title: 'Major Update Available',
+    title: 'Major Updates',
     description: 'A new major version or version tag is available.',
     recommendation:
       'Proceed with caution. Major updates may include breaking changes that require code modifications.',

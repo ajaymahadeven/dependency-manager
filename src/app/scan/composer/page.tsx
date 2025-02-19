@@ -8,8 +8,8 @@ import type {
   Dependencies,
   PackageVersion,
 } from '@/types/interfaces/scan/composer/types';
+import IsAnalyzingComponent from '@/components/is-analyzing/Component';
 import SiteNavbar from '@/components/navbar/Component';
-import IsAnalyzingComponent from '@/components/scan/composer/is-analyzing/Component';
 import PageHeaderComponent from '@/components/scan/composer/page-header/Component';
 import TableResultsComponent from '@/components/scan/composer/table-results/Component';
 import UploadAreaComponent from '@/components/scan/composer/upload-area/Component';
@@ -19,6 +19,14 @@ export default function PackageAnalyzer() {
   const [error, setError] = useState<string | null>(null);
   const [packageData, setPackageData] = useState<PackageVersion[] | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  const [packageStats, setPackageStats] = useState({
+    total: 0,
+    analyzed: 0,
+    upToDate: 0,
+    majorUpdate: 0,
+    outdated: 0,
+  });
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -65,22 +73,32 @@ export default function PackageAnalyzer() {
 
       localStorage.setItem('uploadedPackage', JSON.stringify(json));
 
-      const analyzed = await Promise.all(
-        Object.entries({
-          ...(json.require as Dependencies),
-          ...(json['require-dev'] as Dependencies),
-        }).map(async ([name, version]) => {
-          // Skip PHP version and extensions
-          if (name === 'php' || name.startsWith('ext-')) {
-            return null;
-          }
+      const dependencies = {
+        ...(json.require as Dependencies),
+        ...(json['require-dev'] as Dependencies),
+      };
 
-          // Clean version string from Composer constraints
+      // Filter out PHP and extensions before setting total
+      const filteredDependencies = Object.entries(dependencies).filter(
+        ([name]) => name !== 'php' && !name.startsWith('ext-'),
+      );
+
+      // Set initial package stats
+      setPackageStats({
+        total: filteredDependencies.length,
+        analyzed: 0,
+        upToDate: 0,
+        majorUpdate: 0,
+        outdated: 0,
+      });
+
+      const analyzed = await Promise.all(
+        filteredDependencies.map(async ([name, version], index) => {
           const current = (version as string)
             .replace('^', '')
             .replace('~', '')
             .replace('*', '0')
-            .split('|')[0] // Take first version if there are multiple constraints
+            .split('|')[0]
             .trim();
 
           console.log(`Analyzing ${name} with version ${current}`);
@@ -93,6 +111,26 @@ export default function PackageAnalyzer() {
 
           if (latest) {
             status = updateStatus(latest, current);
+            // Update stats based on version comparison
+            setPackageStats((prev) => {
+              const newStats = { ...prev, analyzed: index + 1 };
+
+              if (status === 'up-to-date') {
+                newStats.upToDate = prev.upToDate + 1;
+              } else if (status === 'major-update') {
+                newStats.majorUpdate = prev.majorUpdate + 1;
+              } else if (status === 'outdated') {
+                newStats.outdated = prev.outdated + 1;
+              }
+
+              return newStats;
+            });
+          } else {
+            // Still increment analyzed count even if package lookup fails
+            setPackageStats((prev) => ({
+              ...prev,
+              analyzed: prev.analyzed + 1,
+            }));
           }
 
           return {
@@ -105,10 +143,7 @@ export default function PackageAnalyzer() {
         }),
       );
 
-      // Filter out null values (PHP and extensions)
-      setPackageData(
-        analyzed.filter((pkg): pkg is PackageVersion => pkg !== null),
-      );
+      setPackageData(analyzed);
     } catch (err) {
       console.error(err);
       setError(
@@ -151,7 +186,7 @@ export default function PackageAnalyzer() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'package.json';
+    a.download = 'composer.json';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -173,7 +208,10 @@ export default function PackageAnalyzer() {
             handleFileInput={handleFileInput}
           />
 
-          <IsAnalyzingComponent isAnalyzing={isAnalyzing} />
+          <IsAnalyzingComponent
+            isAnalyzing={isAnalyzing}
+            packageStats={packageStats}
+          />
 
           <TableResultsComponent
             packageData={packageData}

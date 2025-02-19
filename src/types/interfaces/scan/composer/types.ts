@@ -2,7 +2,7 @@ export interface PackageVersion {
   name: string;
   current: string;
   latest: string;
-  recommended: string;
+  recommended: string | null;
   status: string;
 }
 

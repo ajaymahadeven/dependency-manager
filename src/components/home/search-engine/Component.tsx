@@ -13,8 +13,7 @@ import type {
   SearchRegistryType,
   searchSuggestions,
 } from '@/types/interfaces/search-engine/types';
-import { Download, Search, Star } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -29,8 +28,6 @@ import {
 export default function SearchEngineComponent() {
   let abortController: AbortController | null = null;
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] =
-    useState<SearchEngineResultsForNpm>();
 
   const [searchSuggestions, setSearchSuggestions] =
     useState<searchSuggestions[]>();
@@ -310,53 +307,6 @@ export default function SearchEngineComponent() {
             </Select>
           </div>
         )}
-
-        {/* Search Results */}
-        {/* {hasSearched && (
-          <div className="mt-8 space-y-6">
-            <div className="text-sm text-gray-600">
-              About 1,230,000 results (0.42 seconds)
-            </div>
-            {searchResults.map((result) => (
-              <div key={`${result.type}-${result.name}`} className="space-y-1">
-                <div className="flex items-center gap-2">
-                  {result.type === 'npm' && (
-                    <DiNpm className="h-4 w-4 text-red-600" />
-                  )}
-                  {result.type === 'pypi' && (
-                    <SiPython className="h-4 w-4 text-yellow-400" />
-                  )}
-                  {result.type === 'composer' && (
-                    <SiComposer className="h-4 w-4 text-amber-950" />
-                  )}
-                  <Link
-                    href={result.url}
-                    className="text-sm text-gray-600 hover:underline"
-                  >
-                    {result.url}
-                  </Link>
-                </div>
-                <Link href={result.url}>
-                  <h3 className="text-xl text-blue-600 hover:underline">
-                    {result.name}
-                  </h3>
-                </Link>
-                <p className="text-sm text-gray-600">{result.description}</p>
-                <div className="flex items-center gap-4 text-sm text-gray-600">
-                  <Badge variant="outline">{result.version}</Badge>
-                  <div className="flex items-center gap-1">
-                    <Download className="h-4 w-4" />
-                    {result.downloads}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Star className="h-4 w-4" />
-                    {result.stars}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )} */}
       </div>
     </div>
   );

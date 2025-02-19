@@ -40,7 +40,7 @@ export default function TableResultsComponent({
             </div>
             <Button type="button" onClick={downloadUpdatedPackage}>
               <Download className="mr-2 h-4 w-4" />
-              Download Package.json (Latest)
+              Download Composer.json (Latest)
             </Button>
           </CardHeader>
           <CardContent>

@@ -43,7 +43,7 @@ export default function UploadAreaComponent({
               <input
                 type="file"
                 className="hidden"
-                accept=".txt,.py,.toml"
+                accept=".txt"
                 onChange={handleFileInput}
               />
             </label>

@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { fetchPackageDetails } from '@/actions/pypi/retrievePackageDetails/actions';
 import type { PackageVersion } from '@/types/interfaces/scan/pypi/types';
+import IsAnalyzingComponent from '@/components/is-analyzing/Component';
 import SiteNavbar from '@/components/navbar/Component';
-import IsAnalyzingComponent from '@/components/scan/pypi/is-analyzing/Component';
 import PageHeaderComponent from '@/components/scan/pypi/page-header/Component';
 import TableResultsComponent from '@/components/scan/pypi/table-results/Component';
 import UploadAreaComponent from '@/components/scan/pypi/upload-area/Component';
@@ -15,6 +15,14 @@ export default function Page() {
   const [packageData, setPackageData] = useState<PackageVersion[] | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [fileType, setFileType] = useState<'requirements.txt' | null>(null);
+
+  const [packageStats, setPackageStats] = useState({
+    total: 0,
+    analyzed: 0,
+    upToDate: 0,
+    majorUpdate: 0,
+    outdated: 0,
+  });
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -44,10 +52,10 @@ export default function Page() {
   };
 
   const processFile = async (file: File) => {
-    const validFiles = ['requirements.txt', 'setup.py', 'pyproject.toml'];
+    const validFiles = ['requirements.txt'];
     if (!validFiles.includes(file.name)) {
       setError(
-        'Please upload a valid Python dependency file (requirements.txt, setup.py, or pyproject.toml)',
+        'Please upload a valid Python dependency file (requirements.txt)',
       );
       return;
     }
@@ -63,24 +71,53 @@ export default function Page() {
       setIsAnalyzing(true);
       const content = await file.text();
 
-      // Assuming `content` is a newline-separated list of `name==version`
       const packages = content
         .split('\n')
-        .filter((line) => line.trim() !== '') // Remove empty lines or whitespace-only lines
+        .filter((line) => line.trim() !== '')
         .map((line) => {
           const [name, current] = line.split('==');
-          return { name, current };
+          return { name: name?.trim(), current: current?.trim() };
         })
         .filter((pkg) => pkg.name && pkg.current);
 
+      // Reset and set initial package stats
+      setPackageStats({
+        total: packages.length,
+        analyzed: 0,
+        upToDate: 0,
+        majorUpdate: 0,
+        outdated: 0,
+      });
+
       const analyzed: PackageVersion[] = [];
 
-      for (const pkg of packages) {
+      for (const [index, pkg] of packages.entries()) {
         const packageData = await fetchPackageDetails(pkg.name, pkg.current);
+
         if (typeof packageData !== 'string') {
           analyzed.push(packageData);
+
+          // Update stats based on version comparison
+          setPackageStats((prev) => {
+            const newStats = { ...prev, analyzed: index + 1 };
+
+            if (packageData.status === 'up-to-date') {
+              newStats.upToDate = prev.upToDate + 1;
+            } else if (packageData.status === 'major-update') {
+              newStats.majorUpdate = prev.majorUpdate + 1;
+            } else if (packageData.status === 'outdated') {
+              newStats.outdated = prev.outdated + 1;
+            }
+
+            return newStats;
+          });
         } else {
           console.error(`Failed to analyze package: ${pkg.name}`);
+          // Still increment analyzed count even if package analysis fails
+          setPackageStats((prev) => ({
+            ...prev,
+            analyzed: prev.analyzed + 1,
+          }));
         }
       }
 
@@ -150,21 +187,29 @@ dependencies = [
     <div className="bg-background min-h-screen">
       <SiteNavbar />
       <div className="container mx-auto px-4 py-8">
-        <PageHeaderComponent error={error} />
-        <UploadAreaComponent
-          isDragging={isDragging}
-          handleDragOver={handleDragOver}
-          handleDragLeave={handleDragLeave}
-          handleDrop={handleDrop}
-          handleFileInput={handleFileInput}
-        />
-        <IsAnalyzingComponent isAnalyzing={isAnalyzing} />
-        <TableResultsComponent
-          packageData={packageData}
-          isAnalyzing={isAnalyzing}
-          fileType={fileType}
-          downloadUpdatedFile={downloadUpdatedFile}
-        />
+        <div className="space-y-6">
+          <PageHeaderComponent error={error} />
+          {isAnalyzing ? null : (
+            <UploadAreaComponent
+              isDragging={isDragging}
+              handleDragOver={handleDragOver}
+              handleDragLeave={handleDragLeave}
+              handleDrop={handleDrop}
+              handleFileInput={handleFileInput}
+            />
+          )}
+
+          <IsAnalyzingComponent
+            isAnalyzing={isAnalyzing}
+            packageStats={packageStats}
+          />
+          <TableResultsComponent
+            packageData={packageData}
+            isAnalyzing={isAnalyzing}
+            fileType={fileType}
+            downloadUpdatedFile={downloadUpdatedFile}
+          />
+        </div>
       </div>
     </div>
   );

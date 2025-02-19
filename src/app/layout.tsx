@@ -24,7 +24,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${openSans.variable} font-sans antialiased`}>
+      <body
+        className={`${openSans.variable} font-sans antialiased`}
+        suppressHydrationWarning
+      >
         {children}
       </body>
     </html>

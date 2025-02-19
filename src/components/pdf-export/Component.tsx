@@ -276,11 +276,6 @@ const PDFReport: React.FC<PDFReportProps> = ({
         </View>
 
         <View style={styles.infoBox}>
-          <Image
-            src="/placeholder.svg?height=16&width=16"
-            style={styles.infoIcon}
-            alt={'Info Icon'}
-          />
           <Text style={styles.infoText}>
             Keeping packages updated is crucial for security, performance, and
             compatibility. Regular updates reduce vulnerabilities and ensure

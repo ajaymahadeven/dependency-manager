@@ -1,6 +1,11 @@
+'use client';
+
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import { useState } from 'react';
 import Link from 'next/link';
 import type { PackageVersion } from '@/types/interfaces/scan/pypi/types';
-import { Download } from 'lucide-react';
+import { Download, FileText } from 'lucide-react';
+import PDFReport from '@/components/pdf-export/Component';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -29,6 +34,19 @@ export default function TableResultsComponent({
   fileType: string | null;
   downloadUpdatedFile: (type: 'latest' | 'recommended') => void;
 }) {
+  const [scannedTime] = useState(new Date().toLocaleString());
+
+  const packageStats = packageData
+    ? {
+        total: packageData.length,
+        upToDate: packageData.filter((pkg) => pkg.status === 'up-to-date')
+          .length,
+        outdated: packageData.filter((pkg) => pkg.status === 'outdated').length,
+        majorUpdate: packageData.filter((pkg) => pkg.status === 'major-update')
+          .length,
+      }
+    : { total: 0, upToDate: 0, outdated: 0, majorUpdate: 0 };
+
   return (
     <>
       {packageData && !isAnalyzing && (
@@ -40,22 +58,29 @@ export default function TableResultsComponent({
                 Found {packageData.length} packages in {fileType}
               </CardDescription>
             </div>
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => downloadUpdatedFile('latest')}
-              >
+            <div className="space-x-2">
+              {/* <Button type="button" onClick={downloadUpdatedPackage}>
                 <Download className="mr-2 h-4 w-4" />
-                Latest Versions
-              </Button>
-              <Button
-                type="button"
-                onClick={() => downloadUpdatedFile('recommended')}
+                Download Package.json (Latest)
+              </Button> */}
+              <PDFDownloadLink
+                document={
+                  <PDFReport
+                    fileName="package.json"
+                    scannedTime={scannedTime}
+                    packageData={packageData}
+                    packageStats={packageStats}
+                  />
+                }
+                fileName="dependency-manager-report.pdf"
               >
-                <Download className="mr-2 h-4 w-4" />
-                Recommended Versions
-              </Button>
+                {({ blob, url, loading, error }) => (
+                  <Button disabled={loading} type="button">
+                    <FileText className="mr-2 h-4 w-4" />
+                    {loading ? 'Generating PDF...' : 'Download PDF Report'}
+                  </Button>
+                )}
+              </PDFDownloadLink>
             </div>
           </CardHeader>
           <CardContent>

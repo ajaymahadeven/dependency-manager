@@ -64,13 +64,13 @@ export default function TableResultsComponent({
               <PDFDownloadLink
                 document={
                   <PDFReport
-                    fileName="package.json"
+                    fileName="dependency-manager-report.pdf"
                     scannedTime={scannedTime}
                     packageData={packageData}
                     packageStats={packageStats}
                   />
                 }
-                fileName="dependency-manager-report.pdf"
+                fileName="package.json"
               >
                 {({ blob, url, loading, error }) => (
                   <Button disabled={loading} type="button">

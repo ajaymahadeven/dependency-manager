@@ -72,7 +72,7 @@ export default function TableResultsComponent({
                     packageStats={packageStats}
                   />
                 }
-                fileName="dependency-manager-report.pdf"
+                fileName="requirements.txt"
               >
                 {({ blob, url, loading, error }) => (
                   <Button disabled={loading} type="button">

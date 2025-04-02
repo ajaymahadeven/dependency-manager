@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 interface VersionPackages {
   dist: object;
   version: string;
@@ -12,23 +14,22 @@ export async function findRecommendedPackageVersion(
   current: string,
 ): Promise<string | null> {
   try {
-    const response = await fetch(
-      `https://repo.packagist.org/p2/${packageName}.json`,
+    const response = await axios.get(
+      `https://packagist.org/packages/${packageName}.json`,
     );
-    if (!response.ok) {
+
+    if (!response?.data.package) {
       throw new Error('Package not found');
     }
 
-    const data = await response.json();
-    const versions: VersionPackages[] = data.packages[packageName];
-
-    // Extract version strings
-    const versionStrings = versions.map((version) => version.version);
+    const versions: Record<string, VersionPackages> =
+      response.data.package.versions;
+    const versionStrings = Object.keys(versions);
 
     console.log('Type of the version is:', typeof versions);
     console.log('Versions are:', versionStrings);
 
-    // Filter versions that have the same major version as 'current'
+    // Extract major version
     const currentMajorVersion = current.split('.')[0];
     const filteredVersions = versionStrings.filter((version) => {
       const majorVersion = version.split('.')[0];
@@ -37,16 +38,12 @@ export async function findRecommendedPackageVersion(
 
     console.log('Filtered versions are:', filteredVersions);
 
+    // Get the latest recommended version
     const recommendedVersion = filteredVersions[0];
 
     console.log('Next version is:', recommendedVersion);
 
-    if (recommendedVersion) {
-      return recommendedVersion;
-    } else {
-      console.log('No higher version found for the current version');
-      return current;
-    }
+    return recommendedVersion || current;
   } catch (error) {
     console.error(`Error looking up ${packageName}:`, error);
     return null;

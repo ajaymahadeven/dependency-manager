@@ -36,7 +36,8 @@ export default function HomeCardsComponent() {
               </div>
               <CardTitle className="text-xl">Python Packages</CardTitle>
               <CardDescription>
-                Upload requirements.txt and get your dependencies in order
+                Upload requirements.txt and get your dependencies in order (does
+                not resolve conflicts).
               </CardDescription>
             </CardHeader>
           </Card>

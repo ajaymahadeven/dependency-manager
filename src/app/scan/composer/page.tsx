@@ -8,11 +8,11 @@ import type {
   Dependencies,
   PackageVersion,
 } from '@/types/interfaces/scan/composer/types';
-import IsAnalyzingComponent from '@/components/is-analyzing/Component';
+import AnalyzingComponent from '@/components/analyzing-component/Component';
 import SiteNavbar from '@/components/navbar/Component';
 import PageHeaderComponent from '@/components/scan/composer/page-header/Component';
-import TableResultsComponent from '@/components/scan/composer/table-results/Component';
 import UploadAreaComponent from '@/components/scan/composer/upload-area/Component';
+import TableResultsComponent from '@/components/table-results-component/Component';
 
 export default function PackageAnalyzer() {
   const [isDragging, setIsDragging] = useState(false);
@@ -53,6 +53,22 @@ export default function PackageAnalyzer() {
     if (file) {
       await processFile(file);
     }
+
+    // Reset the input value so the same file can be selected again
+    e.target.value = '';
+  };
+
+  const resetAnalyzer = () => {
+    setPackageData(null);
+    setError(null);
+    setIsAnalyzing(false);
+    setPackageStats({
+      total: 0,
+      analyzed: 0,
+      upToDate: 0,
+      majorUpdate: 0,
+      outdated: 0,
+    });
   };
 
   const processFile = async (file: File) => {
@@ -62,12 +78,14 @@ export default function PackageAnalyzer() {
     }
 
     try {
+      resetAnalyzer(); // Reset state before starting a new analysis
       setIsAnalyzing(true);
       const content = await file.text();
       const json = JSON.parse(content);
 
       if (!json.require && !json['require-dev']) {
         setError('No dependencies found in composer.json');
+        setIsAnalyzing(false);
         return;
       }
 
@@ -154,44 +172,9 @@ export default function PackageAnalyzer() {
     }
   };
 
-  const downloadUpdatedPackage = () => {
-    if (!packageData) return;
-
-    const originalPackage = JSON.parse(
-      localStorage.getItem('uploadedPackage') || '{}',
-    );
-    const updatedPackage = {
-      ...originalPackage,
-      dependencies: {
-        ...originalPackage.dependencies,
-        ...Object.fromEntries(
-          packageData
-            .filter((pkg) => originalPackage.dependencies?.[pkg.name])
-            .map((pkg) => [pkg.name, `^${pkg.latest}`]),
-        ),
-      },
-      devDependencies: {
-        ...originalPackage.devDependencies,
-        ...Object.fromEntries(
-          packageData
-            .filter((pkg) => originalPackage.devDependencies?.[pkg.name])
-            .map((pkg) => [pkg.name, `^${pkg.latest}`]),
-        ),
-      },
-    };
-
-    const blob = new Blob([JSON.stringify(updatedPackage, null, 2)], {
-      type: 'application/json',
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'composer.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
+  const genericPackageData = packageData
+    ? packageData.map((pkg) => ({ ...pkg, recommended: pkg.recommended || '' }))
+    : null;
 
   return (
     <div className="bg-background min-h-screen">
@@ -208,15 +191,15 @@ export default function PackageAnalyzer() {
             handleFileInput={handleFileInput}
           />
 
-          <IsAnalyzingComponent
+          <AnalyzingComponent
             isAnalyzing={isAnalyzing}
             packageStats={packageStats}
           />
 
           <TableResultsComponent
-            packageData={packageData}
+            packageData={genericPackageData}
             isAnalyzing={isAnalyzing}
-            downloadUpdatedPackage={downloadUpdatedPackage}
+            packageManager="composer"
           />
         </div>
       </div>

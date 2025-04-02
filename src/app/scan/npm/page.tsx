@@ -8,11 +8,11 @@ import type {
   Dependencies,
   PackageVersion,
 } from '@/types/interfaces/scan/npm/types';
-import IsAnalyzingComponent from '@/components/is-analyzing/Component';
+import AnalyzingComponent from '@/components/analyzing-component/Component';
 import SiteNavbar from '@/components/navbar/Component';
 import PageHeaderComponent from '@/components/scan/npm/page-header/Component';
-import TableResultsComponent from '@/components/scan/npm/table-results/Component';
 import UploadAreaComponent from '@/components/scan/npm/upload-area/Component';
+import TableResultsComponent from '@/components/table-results-component/Component';
 
 export default function PackageAnalyzer() {
   const [isDragging, setIsDragging] = useState(false);
@@ -162,6 +162,8 @@ export default function PackageAnalyzer() {
     URL.revokeObjectURL(url);
   };
 
+  console.log('Package Status', packageStats);
+
   return (
     <div className="bg-background min-h-screen">
       <SiteNavbar />
@@ -178,14 +180,14 @@ export default function PackageAnalyzer() {
             />
           )}
 
-          <IsAnalyzingComponent
+          <AnalyzingComponent
             isAnalyzing={isAnalyzing}
             packageStats={packageStats}
           />
           <TableResultsComponent
             packageData={packageData}
             isAnalyzing={isAnalyzing}
-            downloadUpdatedPackage={downloadUpdatedPackage}
+            packageManager="npm"
           />
         </div>
       </div>

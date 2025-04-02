@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 interface VersionPackages {
   dist: object;
   version: string;
@@ -11,20 +13,24 @@ export async function packagistRegistryLookup(
   packageName: string,
 ): Promise<string | null> {
   try {
-    const response = await fetch(
-      `https://repo.packagist.org/p2/${packageName}.json`,
+    const response = await axios.get(
+      `https://packagist.org/packages/${packageName}.json`,
     );
-    if (!response.ok) {
+
+    if (!response?.data.package) {
       throw new Error('Package not found');
     }
 
-    const data = await response.json();
-    const versions: VersionPackages[] = data.packages[packageName];
+    console.log('Response Data', response.data);
+
+    const versions: Record<string, VersionPackages> =
+      response.data.package.versions;
+    const versionStrings = Object.keys(versions);
 
     console.log('Type of the version is:', typeof versions);
-    console.log('Versions are:', versions);
+    console.log('Versions are:', versionStrings);
 
-    const latestVersion = versions[0].version as string;
+    const latestVersion = versionStrings[0];
 
     console.log('Latest version is:', latestVersion);
 

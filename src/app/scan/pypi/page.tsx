@@ -3,11 +3,11 @@
 import { useState } from 'react';
 import { fetchPackageDetails } from '@/actions/pypi/retrievePackageDetails/actions';
 import type { PackageVersion } from '@/types/interfaces/scan/pypi/types';
-import IsAnalyzingComponent from '@/components/is-analyzing/Component';
+import AnalyzingComponent from '@/components/analyzing-component/Component';
 import SiteNavbar from '@/components/navbar/Component';
 import PageHeaderComponent from '@/components/scan/pypi/page-header/Component';
-import TableResultsComponent from '@/components/scan/pypi/table-results/Component';
 import UploadAreaComponent from '@/components/scan/pypi/upload-area/Component';
+import TableResultsComponent from '@/components/table-results-component/Component';
 
 export default function Page() {
   const [isDragging, setIsDragging] = useState(false);
@@ -114,10 +114,7 @@ export default function Page() {
         } else {
           console.error(`Failed to analyze package: ${pkg.name}`);
           // Still increment analyzed count even if package analysis fails
-          setPackageStats((prev) => ({
-            ...prev,
-            analyzed: prev.analyzed + 1,
-          }));
+          setPackageStats((prev) => ({ ...prev, analyzed: prev.analyzed + 1 }));
         }
       }
 
@@ -199,7 +196,7 @@ dependencies = [
             />
           )}
 
-          <IsAnalyzingComponent
+          <AnalyzingComponent
             isAnalyzing={isAnalyzing}
             packageStats={packageStats}
           />
@@ -207,7 +204,7 @@ dependencies = [
             packageData={packageData}
             isAnalyzing={isAnalyzing}
             fileType={fileType}
-            downloadUpdatedFile={downloadUpdatedFile}
+            packageManager="pypi"
           />
         </div>
       </div>

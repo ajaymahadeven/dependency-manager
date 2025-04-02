@@ -13,7 +13,7 @@ interface PackageStats {
   outdated: number;
 }
 
-export default function IsAnalyzingComponent({
+export default function AnalyzingComponent({
   isAnalyzing,
   packageStats,
 }: {

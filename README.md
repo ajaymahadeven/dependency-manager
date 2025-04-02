@@ -82,7 +82,7 @@ This project is licensed under the MIT License. See the LICENSE file for details
 
 ## R&D Project
 
-This project was built as a Research & Development project of [Economic Data Sciences](https://economicdatasciences.com).
+This project was built as a R&D project for maintaing other legacy projects and related package managers,not intended for commercial usage.
 
 For more information, please refer to the documentation.
 

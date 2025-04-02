@@ -9,16 +9,17 @@ import type {
   PackageVersion,
 } from '@/types/interfaces/scan/npm/types';
 import AnalyzingComponent from '@/components/analyzing-component/Component';
+import TableResultsComponent from '@/components/generic-table-component/Component';
 import SiteNavbar from '@/components/navbar/Component';
 import PageHeaderComponent from '@/components/scan/npm/page-header/Component';
 import UploadAreaComponent from '@/components/scan/npm/upload-area/Component';
-import TableResultsComponent from '@/components/table-results-component/Component';
 
 export default function PackageAnalyzer() {
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [packageData, setPackageData] = useState<PackageVersion[] | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [hasAnalysed, setHasAnalysed] = useState(false);
 
   const [packageStats, setPackageStats] = useState({
     total: 0,
@@ -62,6 +63,7 @@ export default function PackageAnalyzer() {
     }
 
     try {
+      setHasAnalysed(false);
       setIsAnalyzing(true);
       const content = await file.text();
       const json = JSON.parse(content);
@@ -78,53 +80,61 @@ export default function PackageAnalyzer() {
         ...(json.devDependencies as Dependencies),
       };
 
-      // Set total packages to analyze
-      setPackageStats((prev) => ({
-        ...prev,
-        total: Object.keys(dependencies).length,
+      // Reset stats before analysis
+      const totalPackages = Object.keys(dependencies).length;
+      setPackageStats({
+        total: totalPackages,
         analyzed: 0,
         upToDate: 0,
         majorUpdate: 0,
         outdated: 0,
-      }));
+      });
 
-      const analyzed = await Promise.all(
-        Object.entries(dependencies).map(async ([name, version], index) => {
-          const current = (version as string).replace('^', '');
-          const latest = await npmRegistryLookUp(name);
-          let status = 'unknown';
+      // Process packages sequentially to avoid race conditions
+      const analyzed: PackageVersion[] = [];
+      let upToDateCount = 0;
+      let majorUpdateCount = 0;
+      let outdatedCount = 0;
 
-          if (latest) {
-            status = updateStatus(latest, current);
-            // Update stats based on status
-            setPackageStats((prev) => ({
-              ...prev,
-              analyzed: index + 1,
-              upToDate:
-                status === 'up-to-date' ? prev.upToDate + 1 : prev.upToDate,
-              majorUpdate:
-                status === 'major-update'
-                  ? prev.majorUpdate + 1
-                  : prev.majorUpdate,
-              outdated:
-                status === 'outdated' ? prev.outdated + 1 : prev.outdated,
-            }));
-          }
+      for (const [index, [name, version]] of Object.entries(
+        dependencies,
+      ).entries()) {
+        const current = (version as string).replace('^', '');
+        const latest = await npmRegistryLookUp(name);
+        let status = 'unknown';
 
-          const recommended = latest
-            ? await getRecommendedVersion(current, latest, name)
-            : current;
+        if (latest) {
+          status = updateStatus(latest, current);
 
-          return {
-            name,
-            current,
-            latest: latest || 'unknown',
-            recommended,
-            status,
-          };
-        }),
-      );
+          // Update counts based on status
+          if (status === 'up-to-date') upToDateCount++;
+          if (status === 'major-update') majorUpdateCount++;
+          if (status === 'outdated') outdatedCount++;
+        }
 
+        const recommended = latest
+          ? await getRecommendedVersion(current, latest, name)
+          : current;
+
+        analyzed.push({
+          name,
+          current,
+          latest: latest || 'unknown',
+          recommended,
+          status,
+        });
+
+        // Update stats after each package is analyzed
+        setPackageStats({
+          total: totalPackages,
+          analyzed: index + 1,
+          upToDate: upToDateCount,
+          majorUpdate: majorUpdateCount,
+          outdated: outdatedCount,
+        });
+      }
+
+      setHasAnalysed(true);
       setPackageData(analyzed);
     } catch (err) {
       console.error(err);
@@ -136,31 +146,31 @@ export default function PackageAnalyzer() {
     }
   };
 
-  const downloadUpdatedPackage = () => {
-    const data = JSON.parse(localStorage.getItem('uploadedPackage') || '{}');
-    const updatedDependencies = packageData?.reduce((acc, curr) => {
-      acc[curr.name] = curr.recommended;
-      return acc;
-    }, {} as Dependencies);
+  // const downloadUpdatedPackage = () => {
+  //   const data = JSON.parse(localStorage.getItem('uploadedPackage') || '{}');
+  //   const updatedDependencies = packageData?.reduce((acc, curr) => {
+  //     acc[curr.name] = curr.recommended;
+  //     return acc;
+  //   }, {} as Dependencies);
 
-    data.dependencies = {
-      ...(data.dependencies || {}),
-      ...updatedDependencies,
-    };
-    data.devDependencies = {
-      ...(data.devDependencies || {}),
-      ...updatedDependencies,
-    };
+  //   data.dependencies = {
+  //     ...(data.dependencies || {}),
+  //     ...updatedDependencies,
+  //   };
+  //   data.devDependencies = {
+  //     ...(data.devDependencies || {}),
+  //     ...updatedDependencies,
+  //   };
 
-    const updatedJson = JSON.stringify(data, null, 2);
-    const blob = new Blob([updatedJson], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'updated-package.json';
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+  //   const updatedJson = JSON.stringify(data, null, 2);
+  //   const blob = new Blob([updatedJson], { type: 'application/json' });
+  //   const url = URL.createObjectURL(blob);
+  //   const a = document.createElement('a');
+  //   a.href = url;
+  //   a.download = 'updated-package.json';
+  //   a.click();
+  //   URL.revokeObjectURL(url);
+  // };
 
   console.log('Package Status', packageStats);
 
@@ -183,6 +193,7 @@ export default function PackageAnalyzer() {
           <AnalyzingComponent
             isAnalyzing={isAnalyzing}
             packageStats={packageStats}
+            hasAnalysed={hasAnalysed}
           />
           <TableResultsComponent
             packageData={packageData}

@@ -4,10 +4,10 @@ import { useState } from 'react';
 import { fetchPackageDetails } from '@/actions/pypi/retrievePackageDetails/actions';
 import type { PackageVersion } from '@/types/interfaces/scan/pypi/types';
 import AnalyzingComponent from '@/components/analyzing-component/Component';
+import TableResultsComponent from '@/components/generic-table-component/Component';
 import SiteNavbar from '@/components/navbar/Component';
 import PageHeaderComponent from '@/components/scan/pypi/page-header/Component';
 import UploadAreaComponent from '@/components/scan/pypi/upload-area/Component';
-import TableResultsComponent from '@/components/table-results-component/Component';
 
 export default function Page() {
   const [isDragging, setIsDragging] = useState(false);
@@ -15,6 +15,7 @@ export default function Page() {
   const [packageData, setPackageData] = useState<PackageVersion[] | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [fileType, setFileType] = useState<'requirements.txt' | null>(null);
+  const [hasAnalysed, setHasAnalysed] = useState(false);
 
   const [packageStats, setPackageStats] = useState({
     total: 0,
@@ -68,6 +69,7 @@ export default function Page() {
     setFileType(file.name as typeof fileType);
 
     try {
+      setHasAnalysed(false);
       setIsAnalyzing(true);
       const content = await file.text();
 
@@ -118,6 +120,7 @@ export default function Page() {
         }
       }
 
+      setHasAnalysed(true);
       setPackageData(analyzed);
     } catch (err) {
       console.error(err);
@@ -127,58 +130,58 @@ export default function Page() {
     }
   };
 
-  const downloadUpdatedFile = (versionType: 'recommended' | 'latest') => {
-    if (!packageData || !fileType) return;
+  //   const downloadUpdatedFile = (versionType: 'recommended' | 'latest') => {
+  //     if (!packageData || !fileType) return;
 
-    let content = '';
+  //     let content = '';
 
-    if (fileType === 'requirements.txt') {
-      content = packageData
-        .map(
-          (pkg) =>
-            `${pkg.name}==${versionType === 'latest' ? pkg.latest : pkg.recommended}`,
-        )
-        .join('\n');
-    } else if (fileType === 'setup.py') {
-      content = `from setuptools import setup, find_packages
+  //     if (fileType === 'requirements.txt') {
+  //       content = packageData
+  //         .map(
+  //           (pkg) =>
+  //             `${pkg.name}==${versionType === 'latest' ? pkg.latest : pkg.recommended}`,
+  //         )
+  //         .join('\n');
+  //     } else if (fileType === 'setup.py') {
+  //       content = `from setuptools import setup, find_packages
 
-setup(
-    name="your-package",
-    version="1.0.0",
-    packages=find_packages(),
-    install_requires=[
-        ${packageData
-          .map(
-            (pkg) =>
-              `"${pkg.name}==${versionType === 'latest' ? pkg.latest : pkg.recommended}"`,
-          )
-          .join(',\n        ')}
-    ],
-)`;
-    } else {
-      content = `[project]
-name = "your-package"
-version = "1.0.0"
-dependencies = [
-    ${packageData
-      .map(
-        (pkg) =>
-          `"${pkg.name}==${versionType === 'latest' ? pkg.latest : pkg.recommended}"`,
-      )
-      .join(',\n    ')}
-]`;
-    }
+  // setup(
+  //     name="your-package",
+  //     version="1.0.0",
+  //     packages=find_packages(),
+  //     install_requires=[
+  //         ${packageData
+  //           .map(
+  //             (pkg) =>
+  //               `"${pkg.name}==${versionType === 'latest' ? pkg.latest : pkg.recommended}"`,
+  //           )
+  //           .join(',\n        ')}
+  //     ],
+  // )`;
+  //     } else {
+  //       content = `[project]
+  // name = "your-package"
+  // version = "1.0.0"
+  // dependencies = [
+  //     ${packageData
+  //       .map(
+  //         (pkg) =>
+  //           `"${pkg.name}==${versionType === 'latest' ? pkg.latest : pkg.recommended}"`,
+  //       )
+  //       .join(',\n    ')}
+  // ]`;
+  //     }
 
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${fileType}-${versionType}`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
+  //     const blob = new Blob([content], { type: 'text/plain' });
+  //     const url = URL.createObjectURL(blob);
+  //     const a = document.createElement('a');
+  //     a.href = url;
+  //     a.download = `${fileType}-${versionType}`;
+  //     document.body.appendChild(a);
+  //     a.click();
+  //     document.body.removeChild(a);
+  //     URL.revokeObjectURL(url);
+  //   };
 
   return (
     <div className="bg-background min-h-screen">
@@ -199,6 +202,7 @@ dependencies = [
           <AnalyzingComponent
             isAnalyzing={isAnalyzing}
             packageStats={packageStats}
+            hasAnalysed={hasAnalysed}
           />
           <TableResultsComponent
             packageData={packageData}

@@ -1,5 +1,15 @@
 import semver from 'semver';
 
+// A helper function to check if the version is a valid semver version
+const isValidVersion = (version: string): boolean => {
+  // If the version is a pre-release like 'dev-*', return false as it's not a valid semver
+  if (version.startsWith('dev-')) {
+    return false;
+  }
+  // Try to coerce the version into a valid semver format
+  return semver.valid(semver.coerce(version)) !== null;
+};
+
 export const updateStatus = (latest: string, current: string): string => {
   console.log(`Checking update status for ${current} and ${latest}`);
 
@@ -9,8 +19,18 @@ export const updateStatus = (latest: string, current: string): string => {
   }
 
   // Normalize the versions by coercing shorthand versions like "^9" to "9.0.0"
-  const normalizedCurrent = semver.coerce(current)?.version ?? current;
-  const normalizedLatest = semver.coerce(latest)?.version ?? latest;
+  const normalizedCurrent = isValidVersion(current)
+    ? (semver.coerce(current)?.version ?? current)
+    : 'invalid';
+  const normalizedLatest = isValidVersion(latest)
+    ? (semver.coerce(latest)?.version ?? latest)
+    : 'invalid';
+
+  // If any version is invalid, return 'failed'
+  if (normalizedCurrent === 'invalid' || normalizedLatest === 'invalid') {
+    console.error(`Invalid version(s): current=${current}, latest=${latest}`);
+    return 'failed';
+  }
 
   let status: 'up-to-date' | 'outdated' | 'major-update' = 'outdated';
   try {

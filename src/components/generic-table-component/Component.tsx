@@ -54,6 +54,7 @@ export default function TableResultsComponent<T extends BasePackageVersion>({
 }: TableResultsComponentProps<T>) {
   const [scannedTime] = useState(new Date().toLocaleString());
   const [copiedText, setCopiedText] = useState<string | null>(null);
+  const showCopyButtons = true;
 
   const packageStats = packageData
     ? {
@@ -101,19 +102,6 @@ export default function TableResultsComponent<T extends BasePackageVersion>({
     }
   };
 
-  const getFileName = () => {
-    switch (packageManager) {
-      case 'npm':
-        return 'package.json';
-      case 'pypi':
-        return 'requirements.txt';
-      case 'composer':
-        return 'composer.json';
-      default:
-        return 'dependency-report.pdf';
-    }
-  };
-
   const getStatusClassName = (status: string) => {
     switch (status) {
       case 'up-to-date':
@@ -128,8 +116,6 @@ export default function TableResultsComponent<T extends BasePackageVersion>({
         return 'bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-100';
     }
   };
-
-  const showCopyButtons = packageManager === 'npm' || 'pypi';
 
   return (
     <>
@@ -174,7 +160,7 @@ export default function TableResultsComponent<T extends BasePackageVersion>({
                     packageStats={packageStats}
                   />
                 }
-                fileName={getFileName()}
+                fileName={`dependency-report-${packageManager}.pdf`}
               >
                 {({ blob, url, loading, error }) => (
                   <Button disabled={loading} type="button">

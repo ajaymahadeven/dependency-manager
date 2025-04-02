@@ -9,17 +9,17 @@ import type {
   PackageVersion,
 } from '@/types/interfaces/scan/composer/types';
 import AnalyzingComponent from '@/components/analyzing-component/Component';
+import TableResultsComponent from '@/components/generic-table-component/Component';
 import SiteNavbar from '@/components/navbar/Component';
 import PageHeaderComponent from '@/components/scan/composer/page-header/Component';
 import UploadAreaComponent from '@/components/scan/composer/upload-area/Component';
-import TableResultsComponent from '@/components/table-results-component/Component';
 
 export default function PackageAnalyzer() {
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [packageData, setPackageData] = useState<PackageVersion[] | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-
+  const [hasAnalysed, setHasAnalysed] = useState(false);
   const [packageStats, setPackageStats] = useState({
     total: 0,
     analyzed: 0,
@@ -58,19 +58,6 @@ export default function PackageAnalyzer() {
     e.target.value = '';
   };
 
-  const resetAnalyzer = () => {
-    setPackageData(null);
-    setError(null);
-    setIsAnalyzing(false);
-    setPackageStats({
-      total: 0,
-      analyzed: 0,
-      upToDate: 0,
-      majorUpdate: 0,
-      outdated: 0,
-    });
-  };
-
   const processFile = async (file: File) => {
     if (file.name !== 'composer.json') {
       setError('Please upload a valid composer.json file');
@@ -78,7 +65,7 @@ export default function PackageAnalyzer() {
     }
 
     try {
-      resetAnalyzer(); // Reset state before starting a new analysis
+      setHasAnalysed(false);
       setIsAnalyzing(true);
       const content = await file.text();
       const json = JSON.parse(content);
@@ -102,65 +89,62 @@ export default function PackageAnalyzer() {
       );
 
       // Set initial package stats
+      const totalPackages = filteredDependencies.length;
       setPackageStats({
-        total: filteredDependencies.length,
+        total: totalPackages,
         analyzed: 0,
         upToDate: 0,
         majorUpdate: 0,
         outdated: 0,
       });
 
-      const analyzed = await Promise.all(
-        filteredDependencies.map(async ([name, version], index) => {
-          const current = (version as string)
-            .replace('^', '')
-            .replace('~', '')
-            .replace('*', '0')
-            .split('|')[0]
-            .trim();
+      // Process packages sequentially to avoid race conditions
+      const analyzed: PackageVersion[] = [];
+      let upToDateCount = 0;
+      let majorUpdateCount = 0;
+      let outdatedCount = 0;
 
-          console.log(`Analyzing ${name} with version ${current}`);
-          const latest = await packagistRegistryLookup(name);
-          const recommended = await findRecommendedPackageVersion(
-            name,
-            current,
-          );
-          let status = 'unknown';
+      for (const [index, [name, version]] of filteredDependencies.entries()) {
+        const current = (version as string)
+          .replace('^', '')
+          .replace('~', '')
+          .replace('*', '0')
+          .split('|')[0]
+          .trim();
 
-          if (latest) {
-            status = updateStatus(latest, current);
-            // Update stats based on version comparison
-            setPackageStats((prev) => {
-              const newStats = { ...prev, analyzed: index + 1 };
+        console.log(`Analyzing ${name} with version ${current}`);
+        const latest = await packagistRegistryLookup(name);
+        const recommended = await findRecommendedPackageVersion(name, current);
+        let status = 'unknown';
 
-              if (status === 'up-to-date') {
-                newStats.upToDate = prev.upToDate + 1;
-              } else if (status === 'major-update') {
-                newStats.majorUpdate = prev.majorUpdate + 1;
-              } else if (status === 'outdated') {
-                newStats.outdated = prev.outdated + 1;
-              }
+        if (latest) {
+          status = updateStatus(latest, current);
 
-              return newStats;
-            });
-          } else {
-            // Still increment analyzed count even if package lookup fails
-            setPackageStats((prev) => ({
-              ...prev,
-              analyzed: prev.analyzed + 1,
-            }));
-          }
+          // Update counts based on status
+          if (status === 'up-to-date') upToDateCount++;
+          if (status === 'major-update') majorUpdateCount++;
+          if (status === 'outdated') outdatedCount++;
+        }
 
-          return {
-            name,
-            current,
-            latest: latest || 'unknown',
-            recommended,
-            status,
-          };
-        }),
-      );
+        analyzed.push({
+          name,
+          current,
+          latest: latest || 'unknown',
+          recommended,
+          status,
+        });
 
+        // Update stats after each package is analyzed
+        setPackageStats({
+          total: totalPackages,
+          analyzed: index + 1,
+          upToDate: upToDateCount,
+          majorUpdate: majorUpdateCount,
+          outdated: outdatedCount,
+        });
+      }
+
+      setHasAnalysed(true);
       setPackageData(analyzed);
     } catch (err) {
       console.error(err);
@@ -175,6 +159,8 @@ export default function PackageAnalyzer() {
   const genericPackageData = packageData
     ? packageData.map((pkg) => ({ ...pkg, recommended: pkg.recommended || '' }))
     : null;
+
+  console.log('Generic', genericPackageData);
 
   return (
     <div className="bg-background min-h-screen">
@@ -194,6 +180,7 @@ export default function PackageAnalyzer() {
           <AnalyzingComponent
             isAnalyzing={isAnalyzing}
             packageStats={packageStats}
+            hasAnalysed={hasAnalysed}
           />
 
           <TableResultsComponent

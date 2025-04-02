@@ -1,5 +1,3 @@
-'use client';
-
 import { useEffect, useState } from 'react';
 import { AlertCircle, CheckCircle2, RefreshCw, XCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,40 +14,54 @@ interface PackageStats {
 export default function AnalyzingComponent({
   isAnalyzing,
   packageStats,
+  hasAnalysed,
 }: {
   isAnalyzing: boolean;
   packageStats: PackageStats;
+  hasAnalysed: boolean;
 }) {
   const [progress, setProgress] = useState(0);
 
+  // Ensure that the useEffect has stable dependencies
   useEffect(() => {
-    if (isAnalyzing && packageStats.total > 0) {
+    if (packageStats.total > 0) {
       const percentage = (packageStats.analyzed / packageStats.total) * 100;
       setProgress(percentage);
     } else {
       setProgress(0);
     }
-  }, [isAnalyzing, packageStats.analyzed, packageStats.total]);
+  }, [packageStats.analyzed, packageStats.total]); // These are stable properties
 
-  if (!isAnalyzing) return null;
+  if (!isAnalyzing && !hasAnalysed) return null;
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <RefreshCw className="text-primary h-5 w-5 animate-spin" />
-          Analyzing Dependencies
+          {isAnalyzing ? (
+            <>
+              <RefreshCw className="text-primary h-5 w-5 animate-spin" />
+              Analyzing Dependencies
+            </>
+          ) : (
+            <>
+              <CheckCircle2 className="h-5 w-5 text-green-500" />
+              Analysis Complete
+            </>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
-            <span>Analyzing packages...</span>
+            <span>
+              {isAnalyzing ? 'Analyzing packages...' : 'Analysis complete'}
+            </span>
             <span className="font-medium">
               {packageStats.analyzed} / {packageStats.total} packages
             </span>
           </div>
-          <Progress value={progress} className="h-2" />
+          <Progress value={hasAnalysed ? 100 : progress} className="h-2" />
         </div>
 
         <div className="grid gap-4 sm:grid-cols-3">

@@ -79,7 +79,7 @@ export default function TableResultsComponent<T extends BasePackageVersion>({
   ) => {
     switch (packageManager) {
       case 'npm':
-        return `"${pkg.name}": "${version}"`;
+        return `"${pkg.name}": "^${version.replace(/^\^/, '')}"`;
       case 'pypi':
         return `${pkg.name}==${version}`;
       case 'composer':

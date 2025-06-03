@@ -1,4 +1,5 @@
 import axios from 'axios';
+import semver from 'semver';
 
 interface VersionPackages {
   dist: object;
@@ -18,32 +19,29 @@ export async function findRecommendedPackageVersion(
       `https://packagist.org/packages/${packageName}.json`,
     );
 
-    if (!response?.data.package) {
-      throw new Error('Package not found');
+    const versions = Object.keys(
+      response.data.package.versions as Record<string, VersionPackages>,
+    );
+
+    const currentCoerced = semver.coerce(current);
+    if (!currentCoerced || /^dev-|\.x-dev$/.test(current)) {
+      throw new Error(`Invalid current version: ${current}`);
     }
 
-    const versions: Record<string, VersionPackages> =
-      response.data.package.versions;
-    const versionStrings = Object.keys(versions);
+    const currentMajor = currentCoerced.major;
 
-    console.log('Type of the version is:', typeof versions);
-    console.log('Versions are:', versionStrings);
-
-    // Extract major version
-    const currentMajorVersion = current.split('.')[0];
-    const filteredVersions = versionStrings.filter((version) => {
-      const majorVersion = version.split('.')[0];
-      return majorVersion === currentMajorVersion;
+    const filtered = versions.filter((version) => {
+      const v = semver.coerce(version);
+      return (
+        v && v.major === currentMajor && !/dev|alpha|beta|RC/i.test(version)
+      );
     });
 
-    console.log('Filtered versions are:', filteredVersions);
+    const recommended = filtered.sort((a, b) =>
+      semver.rcompare(semver.coerce(a)!, semver.coerce(b)!),
+    )[0];
 
-    // Get the latest recommended version
-    const recommendedVersion = filteredVersions[0];
-
-    console.log('Next version is:', recommendedVersion);
-
-    return recommendedVersion || current;
+    return recommended || null;
   } catch (error) {
     console.error(`Error looking up ${packageName}:`, error);
     return null;

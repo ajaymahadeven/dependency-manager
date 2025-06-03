@@ -76,14 +76,19 @@ export default function TableResultsComponent<T extends BasePackageVersion>({
   const getPackageVersionString = (
     pkg: BasePackageVersion,
     version: string,
+    packageManager: string,
   ) => {
+    const hasRangeOperator = /^[\^~><=]/.test(version);
+
     switch (packageManager) {
       case 'npm':
+      case 'composer':
+        if (hasRangeOperator) {
+          return `"${pkg.name}": "${version}"`; // keep original if operator exists
+        }
         return `"${pkg.name}": "^${version.replace(/^\^/, '')}"`;
       case 'pypi':
         return `${pkg.name}==${version}`;
-      case 'composer':
-        return `"${pkg.name}": "${version}"`;
       default:
         return `${pkg.name}: ${version}`;
     }
@@ -215,6 +220,7 @@ export default function TableResultsComponent<T extends BasePackageVersion>({
                                         getPackageVersionString(
                                           pkg,
                                           pkg.current,
+                                          packageManager,
                                         ),
                                         `${pkg.name}-current`,
                                       )
@@ -251,6 +257,7 @@ export default function TableResultsComponent<T extends BasePackageVersion>({
                                         getPackageVersionString(
                                           pkg,
                                           pkg.latest,
+                                          packageManager,
                                         ),
                                         `${pkg.name}-latest`,
                                       )
@@ -287,6 +294,7 @@ export default function TableResultsComponent<T extends BasePackageVersion>({
                                         getPackageVersionString(
                                           pkg,
                                           pkg.recommended,
+                                          packageManager,
                                         ),
                                         `${pkg.name}-recommended`,
                                       )

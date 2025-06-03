@@ -1,4 +1,5 @@
 import axios from 'axios';
+import semver from 'semver';
 
 interface VersionPackages {
   dist: object;
@@ -21,20 +22,28 @@ export async function packagistRegistryLookup(
       throw new Error('Package not found');
     }
 
-    console.log('Response Data', response.data);
-
     const versions: Record<string, VersionPackages> =
       response.data.package.versions;
     const versionStrings = Object.keys(versions);
 
-    console.log('Type of the version is:', typeof versions);
-    console.log('Versions are:', versionStrings);
+    // Filter only stable versions (exclude dev, alpha, beta, RC)
+    const stableVersions = versionStrings.filter((v) => {
+      // Exclude unstable versions by common keywords
+      if (/dev|alpha|beta|rc/i.test(v)) return false;
+      // Check if the version is a valid semver (strict)
+      return semver.valid(v) !== null;
+    });
 
-    const latestVersion = versionStrings[0];
+    if (stableVersions.length === 0) {
+      console.warn('No stable versions found');
+      return null;
+    }
 
-    console.log('Latest version is:', latestVersion);
+    // Sort versions from newest to oldest using semver comparison
+    stableVersions.sort(semver.rcompare);
 
-    return latestVersion;
+    // Return the highest stable version string as-is
+    return stableVersions[0];
   } catch (error) {
     console.error(`Error looking up ${packageName}:`, error);
     return null;
